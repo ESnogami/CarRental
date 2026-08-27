@@ -7,11 +7,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddScoped<IDataService, DataService>();
 builder.Services.AddScoped<IMySqlDataService, MySqlDataService>();
-builder.Services.AddScoped<ICategoryRepository, MySqlCategoryRepository>();
+builder.Services.AddKeyedScoped<ICategoryRepository, MySqlCategoryRepository>("MySql");
 builder.Services.AddKeyedScoped<ICategoryRepository, CategoryRepository>("MsSql");
-builder.Services.AddKeyedScoped<ICarRepository, CarRepository>("MsSql");
-builder.Services.AddKeyedScoped<ICustomerRepository, CustomerRepository>("MsSql");
-builder.Services.AddKeyedScoped<ILocationRepository, LocationRepository>("MsSql");
+builder.Services.AddScoped<ICarRepository, CarRepository>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+builder.Services.AddKeyedScoped<IColorRepository, ColorRepository>("MySql");
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

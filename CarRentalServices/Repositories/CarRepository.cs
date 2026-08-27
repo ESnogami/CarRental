@@ -1,5 +1,6 @@
 ﻿using CarRentalServices.Contracts;
 using CarRentalServices.Entities;
+using CarRentalServices.Enums;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -8,12 +9,6 @@ namespace CarRentalServices.Repositories
     public class CarRepository : ICarRepository
     {
         private readonly IDataService _dataService;
-        private enum ActionType
-        {
-            Insert,
-            Update,
-            Delete
-        }
 
         public CarRepository(IDataService dataService)
         {

@@ -1,5 +1,4 @@
-﻿
-using MySqlConnector;
+﻿using MySqlConnector;
 using System.Data;
 
 namespace CarRentalServices.Contracts
@@ -11,4 +10,4 @@ namespace CarRentalServices.Contracts
         DataSet ExecSP(string nameSp, IEnumerable<MySqlParameter> parameters);
         DataSet ExecuteSql(string sqlText);
     }
-}
+}   

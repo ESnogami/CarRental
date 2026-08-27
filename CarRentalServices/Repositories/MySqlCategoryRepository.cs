@@ -1,5 +1,7 @@
 ﻿using CarRentalServices.Contracts;
 using CarRentalServices.Entities;
+using CarRentalServices.Enums;
+using Microsoft.Extensions.DependencyInjection;
 using MySqlConnector;
 using System.Data;
 
@@ -7,18 +9,12 @@ namespace CarRentalServices.Repositories
 {
     public class MySqlCategoryRepository : ICategoryRepository
     {
-        
+
         private readonly IMySqlDataService _mySqlDataService;
 
         public MySqlCategoryRepository(IMySqlDataService mySqlDataService)
         {
             _mySqlDataService = mySqlDataService;
-        }
-        private enum ActionType
-        {
-            Insert,
-            Update,
-            Delete
         }
 
         #region public
@@ -28,7 +24,7 @@ namespace CarRentalServices.Repositories
         /// <returns></returns>
         public IEnumerable<Category> GetCategories()
         {
-            var data = _mySqlDataService.ExecuteSql("SELECT * FROM carrental.dbo_categories;");
+            var data = _mySqlDataService.ExecuteSql("SELECT * FROM carrental.categories;");
             List<Category> lstCategories = [];
             if (data.Tables.Count > 0 && data.Tables[0].Rows.Count > 0)
             {
@@ -39,7 +35,7 @@ namespace CarRentalServices.Repositories
 
         public Category? GetCategoryById(int id)
         {
-            var data = _mySqlDataService.ExecuteSql($"SELECT * FROM carrental.dbo_categories WHERE IdCategory = {id};");
+            var data = _mySqlDataService.ExecuteSql($"SELECT * FROM carrental.categories WHERE IdCategory = {id};");
             if (data.Tables.Count > 0 && data.Tables[0].Rows.Count > 0)
             {
                 return MapCategories(data.Tables[0]).FirstOrDefault();
@@ -54,7 +50,7 @@ namespace CarRentalServices.Repositories
             var result = _mySqlDataService.ExecSP(sql, parameters);
             if(result.Tables.Count>0 && result.Tables[0].Rows.Count > 0)
             {
-                category.IdCategory= (int)result.Tables[0].Rows[0]["newCatId"];
+                category.IdCategory= Convert.ToInt32(result.Tables[0].Rows[0]["newCatId"]);
             }
             return true;
         }

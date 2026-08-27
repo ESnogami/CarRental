@@ -1,5 +1,6 @@
 ﻿using CarRentalServices.Contracts;
 using CarRentalServices.Entities;
+using CarRentalServices.Enums;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -13,12 +14,6 @@ namespace CarRentalServices.Repositories
     public class LocationRepository: ILocationRepository
     {
         private readonly IDataService _dataService;
-        private enum ActionType
-        {
-            Insert,
-            Update,
-            Delete
-        }
 
         public LocationRepository(IDataService dataService)
         {

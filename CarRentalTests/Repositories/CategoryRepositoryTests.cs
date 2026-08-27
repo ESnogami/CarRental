@@ -17,6 +17,37 @@ namespace CarRentalTests.Repositories
             _categoryRepository = new CategoryRepository(_mockDataService.Object);
         }
 
+        #region Helper Methods
+
+        private static DataSet CreateDataSetWithCategories(dynamic[] categories)
+        {
+            var dataSet = new DataSet();
+            var table = new DataTable();
+            table.Columns.Add("IdCategory", typeof(int));
+            table.Columns.Add("Label", typeof(string));
+            table.Columns.Add("Description", typeof(string));
+
+            foreach (var category in categories)
+            {
+                table.Rows.Add(category.IdCategory, category.Label, category.Description);
+            }
+
+            dataSet.Tables.Add(table);
+            return dataSet;
+        }
+
+        private static DataSet CreateDataSetWithInsertResult(int newCatId)
+        {
+            var dataSet = new DataSet();
+            var table = new DataTable();
+            table.Columns.Add("newCatId", typeof(int));
+            table.Rows.Add(newCatId);
+            dataSet.Tables.Add(table);
+            return dataSet;
+        }
+
+        #endregion
+
         #region GetCategories Tests
 
         [Fact]
@@ -259,35 +290,6 @@ namespace CarRentalTests.Repositories
 
         #endregion
 
-        #region Helper Methods
-
-        private static DataSet CreateDataSetWithCategories(dynamic[] categories)
-        {
-            var dataSet = new DataSet();
-            var table = new DataTable();
-            table.Columns.Add("IdCategory", typeof(int));
-            table.Columns.Add("Label", typeof(string));
-            table.Columns.Add("Description", typeof(string));
-
-            foreach (var category in categories)
-            {
-                table.Rows.Add(category.IdCategory, category.Label, category.Description);
-            }
-
-            dataSet.Tables.Add(table);
-            return dataSet;
-        }
-
-        private static DataSet CreateDataSetWithInsertResult(int newCatId)
-        {
-            var dataSet = new DataSet();
-            var table = new DataTable();
-            table.Columns.Add("newCatId", typeof(int));
-            table.Rows.Add(newCatId);
-            dataSet.Tables.Add(table);
-            return dataSet;
-        }
-
-        #endregion
+        
     }
 }

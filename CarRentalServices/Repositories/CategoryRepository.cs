@@ -1,11 +1,13 @@
 ﻿using CarRentalServices.Contracts;
 using CarRentalServices.Entities;
+using CarRentalServices.Enums;
 using CarRentalServices.Services;
 using Microsoft.Data.SqlClient;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,13 +17,6 @@ namespace CarRentalServices.Repositories
     public class CategoryRepository : ICategoryRepository
     {
         private readonly IDataService _dataService;
-
-        private enum ActionType
-        {
-            Insert,
-            Update,
-            Delete
-        }
 
         public CategoryRepository(IDataService dataService)
         {
@@ -121,23 +116,22 @@ namespace CarRentalServices.Repositories
                 case ActionType.Update:
                     parameters.Add(new SqlParameter()
                     {
-                        ParameterName = "@Label",
+                        ParameterName = "@p_Label",
                         SqlDbType = SqlDbType.VarChar,
                         Size = 50,
                         Value = category.Label ?? (object)DBNull.Value
                     });
                     parameters.Add(new SqlParameter()
                     {
-                        ParameterName = "@Description",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = category.Description ?? (object)DBNull.Value
+                        ParameterName = "@p_id",
+                        SqlDbType = SqlDbType.Int,
+                    
+                        Value = category.IdCategory  
                     });
                     parameters.Add(new SqlParameter()
                     {
                         ParameterName = "@categoryId",
                         SqlDbType = SqlDbType.Int,
-                        Size = 50,
                         Value = category.IdCategory
                     });
                     break;
