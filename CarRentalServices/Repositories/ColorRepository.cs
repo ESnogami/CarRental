@@ -2,6 +2,7 @@
 using CarRentalServices.Entities;
 using CarRentalServices.Enums;
 using CarRentalServices.Services;
+using CarRentalServices.Utilities;
 using Microsoft.Data.SqlClient;
 using MySqlConnector;
 using System;
@@ -83,49 +84,28 @@ namespace CarRentalServices.Repositories
 
             return lstColors;
         }
+
         private static IEnumerable<MySqlParameter> CreateParametersMySql(
             Color color,
             ActionType actionType)
         {
-            var parameters = new List<MySqlParameter>();
-            switch (actionType)
+            return actionType switch
             {
-                case ActionType.Insert:
-                    parameters.Add(new MySqlParameter()
-                    {
-                        ParameterName = "@p_Name",
-                        MySqlDbType = MySqlDbType.VarChar,
-                        Size = 50,
-                        Value = color.Name?? (object)DBNull.Value
-                    });                    
-                    break;
-                case ActionType.Update:
-                    parameters.Add(new MySqlParameter()
-                    {
-                        ParameterName = "@p_Name",
-                        MySqlDbType = MySqlDbType.VarChar,
-                        Size = 50,
-                        Value = color.Name ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new MySqlParameter()
-                    {
-                        ParameterName = "@p_id",
-                        MySqlDbType = MySqlDbType.VarChar,
-                        Size = 50,
-                        Value = color.Name ?? (object)DBNull.Value
-                    });
-                    break;
-                case ActionType.Delete:
-                    parameters.Add(new MySqlParameter()
-                    {
-                        ParameterName = "@p_id",
-                        MySqlDbType = MySqlDbType.Int32,
-                        Value = color.IdColor
-                    });
-                    break;
-            }
-
-            return parameters;
+                ActionType.Insert => new List<MySqlParameter>
+                {
+                    MySqlParameterBuilder.CreateParameter("@p_Name", MySqlDbType.VarChar, 50, color.Name)
+                },
+                ActionType.Update => new List<MySqlParameter>
+                {
+                    MySqlParameterBuilder.CreateParameter("@p_Name", MySqlDbType.VarChar, 50, color.Name),
+                    MySqlParameterBuilder.CreateParameter("@p_id", MySqlDbType.Int32, (object)color.IdColor)
+                },
+                ActionType.Delete => new List<MySqlParameter>
+                {
+                    MySqlParameterBuilder.CreateParameter("@p_id", MySqlDbType.Int32, (object)color.IdColor)
+                },
+                _ => new List<MySqlParameter>()
+            };
         }
         #endregion
     }

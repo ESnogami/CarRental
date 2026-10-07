@@ -21,13 +21,13 @@ namespace CarRentalServices.Entities
         public int Model { get; set; }
 
         public int BrandId { get; set; }
-        public required string Brand { get; set; }
+        public string? Brand { get; set; }
 
         public int ColorId { get; set; }
-        public required string Color { get; set; }
+        public string? Color { get; set; }
 
         public int CategoryId { get; set; }
-        public required string Category { get; set; }
+        public string? Category { get; set; }
 
         public byte  Passengers { get; set; }
     }

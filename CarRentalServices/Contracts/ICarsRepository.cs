@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace CarRentalServices.Contracts
 {
-    public interface ICarRepository
+    public interface ICarsRepository
     {
         IEnumerable<Car> GetCars();
 
         Car? GetCarById(int id);
 
-        bool InsertCar(Car car);
+        int InsertCar(Car car);
 
         bool UpdateCar(Car car);
 

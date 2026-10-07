@@ -1,7 +1,9 @@
-﻿using CarRentalServices.Contracts;
+﻿using CarRental.Models;
+using CarRentalServices.Contracts;
 using CarRentalServices.Entities;
 using CarRentalServices.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 
 namespace CarRental.Controllers
 {
@@ -9,9 +11,9 @@ namespace CarRental.Controllers
     [Route("[controller]")]
     public class CarsController : Controller
     {
-        private readonly ICarRepository _carRepository;
+        private readonly ICarsRepository _carRepository;
 
-        public CarsController([FromKeyedServices("MsSql")] ICarRepository carRepository)
+        public CarsController([FromKeyedServices("MySql")] ICarsRepository carRepository)
         {
             _carRepository = carRepository;
         }
@@ -19,7 +21,7 @@ namespace CarRental.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            var lstCars = _carRepository.GetCars();
+            var lstCars = MapViewModel(_carRepository.GetCars());
             return Json(lstCars);
         }
 
@@ -46,6 +48,27 @@ namespace CarRental.Controllers
         {
             var result = _carRepository.UpdateCar(car);
             return result ? Ok() : NoContent();
+        }
+
+        private List<CarViewModel> MapViewModel(IEnumerable<Car> cars)
+        {
+            var lstCars = new List<CarViewModel>();
+            foreach (var car in cars)
+            {
+                var carViewModel = new CarViewModel 
+                {
+                    IdCar = car.IdCar,
+                    Description = car.Description,
+                    VinNumber = car.VinNumber,
+                    Model = car.Model,
+                    Brand = car.Brand,
+                    Color = car.Color,
+                    Category = car.Category,
+                };
+                lstCars.Add(carViewModel);
+            }
+
+            return lstCars;
         }
     }
 }

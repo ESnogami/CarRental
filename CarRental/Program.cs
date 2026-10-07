@@ -9,10 +9,12 @@ builder.Services.AddScoped<IDataService, DataService>();
 builder.Services.AddScoped<IMySqlDataService, MySqlDataService>();
 builder.Services.AddKeyedScoped<ICategoryRepository, MySqlCategoryRepository>("MySql");
 builder.Services.AddKeyedScoped<ICategoryRepository, CategoryRepository>("MsSql");
-builder.Services.AddScoped<ICarRepository, CarRepository>();
+builder.Services.AddKeyedScoped<ICarsRepository, CarRepository>("MsSql");
+builder.Services.AddKeyedScoped<ICarsRepository, CarsRepository>("MySql");
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddKeyedScoped<IColorRepository, ColorRepository>("MySql");
+builder.Services.AddKeyedScoped<IBrandRepository, BrandRepository>("MySql");
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

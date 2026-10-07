@@ -110,7 +110,6 @@ namespace CarRental.Controllers
         [ProducesResponseType(typeof(void), 204)]
         public IActionResult Delete(int id)
         {
-            var sql = "DeleteCategory";
             var result = _categoryRepository.DeleteCategory(id);
             return NoContent();
         }

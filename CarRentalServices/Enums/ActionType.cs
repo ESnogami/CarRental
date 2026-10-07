@@ -7,6 +7,7 @@ namespace CarRentalServices.Enums
     {
         Insert,
         Update,
-        Delete
+        Delete,
+        SelectById
     }
 }

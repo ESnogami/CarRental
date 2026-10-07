@@ -2,6 +2,7 @@
 using CarRentalServices.Entities;
 using CarRentalServices.Enums;
 using CarRentalServices.Services;
+using CarRentalServices.Utilities;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -87,119 +88,32 @@ namespace CarRentalServices.Repositories
 
         private static IEnumerable<SqlParameter> CreateSqlParameters(Customer customer, ActionType actionType)
         {
-            var parameters = new List<SqlParameter>();
-            switch (actionType)
+            return actionType switch
             {
-                case ActionType.Insert:
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@FirstName",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = customer.FirstName ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@LastName",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = customer.LastName ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@SSN",
-                        SqlDbType = SqlDbType.VarChar,
-                        Value = customer.SocialSecurityNumber
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Email",
-                        SqlDbType = SqlDbType.VarChar,
-                        Value = customer.Email
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@CountryId",
-                        SqlDbType = SqlDbType.Int,
-                        Value = customer.CountryId
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Mobile",
-                        SqlDbType = SqlDbType.VarChar,
-                        Value = customer.MobilePhone
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@StateName",
-                        SqlDbType = SqlDbType.VarChar,
-                        Value = customer.StateName,
-                    });
-                    break;
-                case ActionType.Update:
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@FirstName",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = customer.FirstName ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@LastName",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = customer.LastName ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@SSN",
-                        SqlDbType = SqlDbType.VarChar,
-                        Value = customer.SocialSecurityNumber
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Email",
-                        SqlDbType = SqlDbType.VarChar,
-                        Value = customer.Email
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@CountryId",
-                        SqlDbType = SqlDbType.Int,
-                        Value = customer.CountryId
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Mobile",
-                        SqlDbType = SqlDbType.VarChar,
-                        Value = customer.MobilePhone
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@StateName",
-                        SqlDbType = SqlDbType.VarChar,
-                        Value = customer.StateName,
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@customerId",
-                        SqlDbType = SqlDbType.Int,
-                        Value = customer.IdCustomer
-                    });
-                    break;
-
-                case ActionType.Delete:
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@customerId",
-                        SqlDbType = SqlDbType.Int,
-                        Value = customer.IdCustomer
-                    });
-                    break;
-            }
-
-            return parameters;
+                ActionType.Insert => new List<SqlParameter>
+                {
+                    SqlParameterBuilder.CreateParameter("@FirstName", SqlDbType.VarChar, 50, customer.FirstName),
+                    SqlParameterBuilder.CreateParameter("@LastName", SqlDbType.VarChar, 50, customer.LastName),
+                    SqlParameterBuilder.CreateParameter("@SSN", SqlDbType.VarChar, customer.SocialSecurityNumber),
+                    SqlParameterBuilder.CreateParameter("@Email", SqlDbType.VarChar, customer.Email),
+                    SqlParameterBuilder.CreateParameter("@CountryId", SqlDbType.Int, customer.CountryId),
+                    SqlParameterBuilder.CreateParameter("@Mobile", SqlDbType.VarChar, customer.MobilePhone),
+                    SqlParameterBuilder.CreateParameter("@StateName", SqlDbType.VarChar, customer.StateName)
+                },
+                ActionType.Update => new List<SqlParameter>
+                {
+                    SqlParameterBuilder.CreateParameter("@FirstName", SqlDbType.VarChar, 50, customer.FirstName),
+                    SqlParameterBuilder.CreateParameter("@LastName", SqlDbType.VarChar, 50, customer.LastName),
+                    SqlParameterBuilder.CreateParameter("@SSN", SqlDbType.VarChar, customer.SocialSecurityNumber),
+                    SqlParameterBuilder.CreateParameter("@Email", SqlDbType.VarChar, customer.Email),
+                    SqlParameterBuilder.CreateParameter("@CountryId", SqlDbType.Int, customer.CountryId),
+                    SqlParameterBuilder.CreateParameter("@Mobile", SqlDbType.VarChar, customer.MobilePhone),
+                    SqlParameterBuilder.CreateParameter("@StateName", SqlDbType.VarChar, customer.StateName),
+                    SqlParameterBuilder.CreateParameter("@customerId", SqlDbType.Int, customer.IdCustomer)
+                },
+                _ => new List<SqlParameter>()
+            };      
+                        
         }
         #endregion
     }

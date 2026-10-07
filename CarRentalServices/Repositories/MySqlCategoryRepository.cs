@@ -1,6 +1,7 @@
 ﻿using CarRentalServices.Contracts;
 using CarRentalServices.Entities;
 using CarRentalServices.Enums;
+using CarRentalServices.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using MySqlConnector;
 using System.Data;
@@ -94,59 +95,25 @@ namespace CarRentalServices.Repositories
         private static IEnumerable<MySqlParameter> CreateParametersMySql(Category category,
             ActionType actionType)
         {
-            var parameters = new List<MySqlParameter>();
-            switch (actionType)
+            return actionType switch
+            {
+                ActionType.Insert => new List<MySqlParameter>
                 {
-                    case ActionType.Insert:
-                        parameters.Add(new MySqlParameter()
-                        {
-                            ParameterName = "@Label",
-                            MySqlDbType = MySqlDbType.VarChar,
-                            Size = 50,
-                            Value = category.Label ?? (object)DBNull.Value
-                        });
-                        parameters.Add(new MySqlParameter()
-                        {
-                            ParameterName = "@Description",
-                            MySqlDbType = MySqlDbType.VarChar,
-                            Size = 50,
-                            Value = category.Description ?? (object)DBNull.Value
-                        });
-                        break;
-                    case ActionType.Update:
-                        parameters.Add(new MySqlParameter()
-                        {
-                            ParameterName = "@Label",
-                            MySqlDbType = MySqlDbType.VarChar,
-                            Size = 50,
-                            Value = category.Label ?? (object)DBNull.Value
-                        });
-                        parameters.Add(new MySqlParameter()
-                        {
-                            ParameterName = "@Description",
-                            MySqlDbType = MySqlDbType.VarChar,
-                            Size = 50,
-                            Value = category.Description ?? (object)DBNull.Value
-                        });
-                        parameters.Add(new MySqlParameter()
-                        {
-                            ParameterName = "@categoryId",
-                            MySqlDbType = MySqlDbType.Int16,
-                            Size = 50,
-                            Value = category.IdCategory
-                        });
-                        break;
-                    case ActionType.Delete:
-                        parameters.Add(new MySqlParameter()
-                        {
-                            ParameterName = "@categoryId",
-                            MySqlDbType = MySqlDbType.Int32,
-                            Value = category.IdCategory
-                        });
-                        break;
-            }
-            
-            return parameters;
+                    MySqlParameterBuilder.CreateParameter("@Label", MySqlDbType.VarChar, 50, category.Label),
+                    MySqlParameterBuilder.CreateParameter("@Description", MySqlDbType.VarChar, 50, category.Description)
+                },
+                ActionType.Update => new List<MySqlParameter>
+                {
+                    MySqlParameterBuilder.CreateParameter("@Label", MySqlDbType.VarChar, 50, category.Label),
+                    MySqlParameterBuilder.CreateParameter("@Description", MySqlDbType.VarChar, 50, category.Description),
+                    MySqlParameterBuilder.CreateParameter("@categoryId", MySqlDbType.Int32, category.IdCategory)
+                },
+                ActionType.Delete => new List<MySqlParameter>
+                {
+                    MySqlParameterBuilder.CreateParameter("@categoryId", MySqlDbType.Int32, category.IdCategory)
+                },
+                _ => new List<MySqlParameter>()
+            };
         }
         #endregion
     }

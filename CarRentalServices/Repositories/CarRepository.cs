@@ -1,12 +1,13 @@
 ﻿using CarRentalServices.Contracts;
 using CarRentalServices.Entities;
 using CarRentalServices.Enums;
+using CarRentalServices.Utilities;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace CarRentalServices.Repositories
 {
-    public class CarRepository : ICarRepository
+    public class CarRepository : ICarsRepository
     {
         private readonly IDataService _dataService;
 
@@ -33,10 +34,17 @@ namespace CarRentalServices.Repositories
 
         public Car? GetCarById(int id)
         {
-            throw new NotImplementedException();
+           
+            var data = _dataService.ExecuteSql($"SELECT * FROM Cars WHERE IdCar = {id};");
+            if (data.Tables.Count > 0 && data.Tables[0].Rows.Count > 0)
+            {
+                return MapCars(data.Tables[0]).FirstOrDefault();
+            }
+            return null;
         }
 
-        public bool InsertCar(Car car)
+
+        public int InsertCar(Car car)
         {
             var sql = "InsertCar";
             IEnumerable<SqlParameter> parameters = CreateSqlParameters(car, ActionType.Insert);
@@ -45,8 +53,9 @@ namespace CarRentalServices.Repositories
             {
                 car.IdCar = Convert.ToInt32(result.Tables[0].Rows[0]["newCarId"]);
             }
-            return car.IdCar >0;
+            return car.IdCar;
         }
+
 
         public bool UpdateCar(Car car)
         {
@@ -81,119 +90,37 @@ namespace CarRentalServices.Repositories
 
         private static IEnumerable<SqlParameter> CreateSqlParameters(Car car, ActionType actionType)
         {
-            var parameters = new List<SqlParameter>();
-            switch (actionType)
+            return actionType switch
             {
-                case ActionType.Insert:
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Description",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = car.Description ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@VIN",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = car.VinNumber ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Model",
-                        SqlDbType = SqlDbType.Int,
-                        Value = car.Model
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Brand",
-                        SqlDbType = SqlDbType.Int,
-                        Value = car.BrandId
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Color",
-                        SqlDbType = SqlDbType.Int,
-                        Value = car.ColorId
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@CategoryId",
-                        SqlDbType = SqlDbType.Int,
-                        Value = car.CategoryId
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Passengers",
-                        SqlDbType = SqlDbType.TinyInt,
-                        Value = car.Passengers,
-                    });
-                    break;
-                case ActionType.Update:
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@CarId",
-                        SqlDbType = SqlDbType.Int,
-                        Value = car.IdCar 
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Description",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = car.Description ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@VIN",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = car.VinNumber ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Model",
-                        SqlDbType = SqlDbType.Int,
-                        Value = car.Model == 0 ? DBNull.Value : car.Model
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Brand",
-                        SqlDbType = SqlDbType.Int,
-                        Value = car.BrandId
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Color",
-                        SqlDbType = SqlDbType.Int,
-                        Value = car.ColorId
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@CategoryId",
-                        SqlDbType = SqlDbType.Int,
-                        Value = car.CategoryId
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Passengers",
-                        SqlDbType = SqlDbType.TinyInt,
-                        Value = car.Passengers,
-                    });
-                    break;
-                case ActionType.Delete:
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@IdCar",
-                        SqlDbType = SqlDbType.Int,
-                        Value = car.IdCar 
-                    });
-                    break;
-            }
-
-            return parameters;
+                ActionType.Insert => new List<SqlParameter>
+                {
+                    SqlParameterBuilder.CreateParameter("@Description", SqlDbType.VarChar, 50, car.Description),
+                    SqlParameterBuilder.CreateParameter("@VIN", SqlDbType.VarChar, 50, car.VinNumber),
+                    SqlParameterBuilder.CreateParameter("@Model", SqlDbType.Int, (object)car.Model),
+                    SqlParameterBuilder.CreateParameter("@Brand", SqlDbType.Int, (object)car.BrandId),
+                    SqlParameterBuilder.CreateParameter("@Color", SqlDbType.Int, (object)car.ColorId),
+                    SqlParameterBuilder.CreateParameter("@CategoryId", SqlDbType.Int, (object)car.CategoryId),
+                    SqlParameterBuilder.CreateParameter("@Passengers", SqlDbType.TinyInt, (object)car.Passengers)
+                },
+                ActionType.Update => new List<SqlParameter>
+                {
+                    SqlParameterBuilder.CreateParameter("@CarId", SqlDbType.Int, (object)car.IdCar),
+                    SqlParameterBuilder.CreateParameter("@Description", SqlDbType.VarChar, 50, car.Description),
+                    SqlParameterBuilder.CreateParameter("@VIN", SqlDbType.VarChar, 50, car.VinNumber),
+                    SqlParameterBuilder.CreateParameter("@Model", SqlDbType.Int, car.Model == 0 ? (object)DBNull.Value : car.Model),
+                    SqlParameterBuilder.CreateParameter("@Brand", SqlDbType.Int, (object)car.BrandId),
+                    SqlParameterBuilder.CreateParameter("@Color", SqlDbType.Int, (object)car.ColorId),
+                    SqlParameterBuilder.CreateParameter("@CategoryId", SqlDbType.Int, (object)car.CategoryId),
+                    SqlParameterBuilder.CreateParameter("@Passengers", SqlDbType.TinyInt, (object)car.Passengers)
+                },
+                ActionType.Delete => new List<SqlParameter>
+                {
+                    SqlParameterBuilder.CreateParameter("@IdCar", SqlDbType.Int, (object)car.IdCar)
+                },
+                _ => new List<SqlParameter>()
+            };
         }
+
         #endregion
     }
 }

@@ -1,6 +1,7 @@
 ﻿using CarRentalServices.Contracts;
 using CarRentalServices.Entities;
 using CarRentalServices.Enums;
+using CarRentalServices.Utilities;
 using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
@@ -87,95 +88,31 @@ namespace CarRentalServices.Repositories
 
         private IEnumerable<SqlParameter> CreateSqlParameters(Location location, ActionType actionType)
         {
-            var parameters = new List<SqlParameter>();
-            switch (actionType)
+            return actionType switch
             {
-                case ActionType.Insert:
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@StreetName",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = location.StreetName ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@StreetNumber",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = location.StreetNumber ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@City",
-                        SqlDbType = SqlDbType.VarChar,
-                        Value = location.City ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@State",
-                        SqlDbType = SqlDbType.VarChar,
-                        Value = location.State
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@CountryId",
-                        SqlDbType = SqlDbType.Int,
-                        Value = location.CountryId
-                    });                    
-                    break;
-                case ActionType.Update:
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@StreetName",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = location.StreetName ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@StreetNumber",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = location.StreetNumber ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@City",
-                        SqlDbType = SqlDbType.VarChar,
-                        Value = location.City ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@State",
-                        SqlDbType = SqlDbType.VarChar,
-                        Value = location.State
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@CountryId",
-                        SqlDbType = SqlDbType.Int,
-                        Value = location.CountryId
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@locationId",
-                        SqlDbType = SqlDbType.Int,
-                        Value = location.Id
-                    });
-                    break;
-
-                case ActionType.Delete:
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@LocationId",
-                        SqlDbType = SqlDbType.Int,
-                        Value = location.Id
-                    });
-                    break;
-            }
-
-            return parameters;
+                ActionType.Insert => new List<SqlParameter>
+                {
+                    SqlParameterBuilder.CreateParameter("@StreetName", SqlDbType.VarChar, 50, location.StreetName),
+                    SqlParameterBuilder.CreateParameter("@StreetNumber", SqlDbType.VarChar, 50, location.StreetNumber),
+                    SqlParameterBuilder.CreateParameter("@City", SqlDbType.VarChar, location.City),
+                    SqlParameterBuilder.CreateParameter("@State", SqlDbType.VarChar, location.State),
+                    SqlParameterBuilder.CreateParameter("@CountryId", SqlDbType.Int, (object)location.CountryId)
+                },
+                ActionType.Update => new List<SqlParameter>
+                {
+                    SqlParameterBuilder.CreateParameter("@StreetName", SqlDbType.VarChar, 50, location.StreetName),
+                    SqlParameterBuilder.CreateParameter("@StreetNumber", SqlDbType.VarChar, 50, location.StreetNumber),
+                    SqlParameterBuilder.CreateParameter("@City", SqlDbType.VarChar, location.City),
+                    SqlParameterBuilder.CreateParameter("@State", SqlDbType.VarChar, location.State),
+                    SqlParameterBuilder.CreateParameter("@CountryId", SqlDbType.Int, (object)location.CountryId),
+                    SqlParameterBuilder.CreateParameter("@locationId", SqlDbType.Int, (object)location.Id)
+                },
+                ActionType.Delete => new List<SqlParameter>
+                {
+                    SqlParameterBuilder.CreateParameter("@LocationId", SqlDbType.Int, (object)location.Id)
+                },
+                _ => new List<SqlParameter>()
+            };
         }
 
         #endregion

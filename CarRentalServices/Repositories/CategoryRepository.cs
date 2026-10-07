@@ -2,6 +2,7 @@
 using CarRentalServices.Entities;
 using CarRentalServices.Enums;
 using CarRentalServices.Services;
+using CarRentalServices.Utilities;
 using Microsoft.Data.SqlClient;
 using MySqlConnector;
 using System;
@@ -14,15 +15,29 @@ using System.Threading.Tasks;
 
 namespace CarRentalServices.Repositories
 {
+    /// <summary>
+    /// Repository class for managing Category entities in the database.
+    /// </summary>
     public class CategoryRepository : ICategoryRepository
     {
+        /// <summary>
+        /// The data service used for executing SQL commands and stored procedures.
+        /// </summary>
         private readonly IDataService _dataService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CategoryRepository"/> class with the specified data service.
+        /// </summary>
+        /// <param name="dataService"></param>
         public CategoryRepository(IDataService dataService)
         {
             _dataService = dataService;
         }
 
+        /// <summary>
+        /// Retrieves all categories from the database.
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<Category> GetCategories()
         {
             var data = _dataService.ExecuteSql("SELECT * FROM dbo.Categories;");
@@ -34,6 +49,11 @@ namespace CarRentalServices.Repositories
             return lstCategories;
         }
 
+        /// <summary>
+        /// Retrieves a category by its ID from the database.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public Category? GetCategoryById(int id)
         {
             var data = _dataService.ExecuteSql($"SELECT * FROM dbo.Categories WHERE IdCategory = {id};");
@@ -44,6 +64,11 @@ namespace CarRentalServices.Repositories
             return null;
         }
 
+        /// <summary>
+        /// Inserts a new category into the database and updates the category's ID with the newly generated ID.
+        /// </summary>
+        /// <param name="category"></param>
+        /// <returns></returns>
         public bool InsertCategory(Category category)
         {
             var sql = "InsertCategory";
@@ -56,6 +81,11 @@ namespace CarRentalServices.Repositories
             return true;
         }
 
+        /// <summary>
+        /// Updates an existing category in the database.
+        /// </summary>
+        /// <param name="category"></param>
+        /// <returns></returns>
         public bool UpdateCategory(Category category)
         {
             var sql = "UpdateCategory";
@@ -64,6 +94,11 @@ namespace CarRentalServices.Repositories
             return true;
         }
 
+        /// <summary>
+        /// Deletes a category from the database by its ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public bool DeleteCategory(int id)
         {
             var sql = "DeleteCategory";
@@ -74,6 +109,11 @@ namespace CarRentalServices.Repositories
         }
 
         #region private
+        /// <summary>
+        /// Maps a DataTable to a list of Category objects.
+        /// </summary>
+        /// <param name="dataTable"></param>
+        /// <returns></returns>
         private static List<Category> MapCategories(DataTable dataTable)
         {
             var lstCategories = new List<Category>();
@@ -91,61 +131,34 @@ namespace CarRentalServices.Repositories
             return lstCategories;
         }
 
+        /// <summary>
+        /// Creates SQL parameters for the specified category and action type.
+        /// </summary>
+        /// <param name="category"></param>
+        /// <param name="actionType"></param>
+        /// <returns></returns>
         private static IEnumerable<SqlParameter> CreateSqlParameters(Category category,
             ActionType actionType)
         {
-            var parameters = new List<SqlParameter>();
-            switch (actionType)
+            return actionType switch
             {
-                case ActionType.Insert:
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Label",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = category.Label ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@Description",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = category.Description ?? (object)DBNull.Value
-                    });
-                    break;
-                case ActionType.Update:
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@p_Label",
-                        SqlDbType = SqlDbType.VarChar,
-                        Size = 50,
-                        Value = category.Label ?? (object)DBNull.Value
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@p_id",
-                        SqlDbType = SqlDbType.Int,
-                    
-                        Value = category.IdCategory  
-                    });
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@categoryId",
-                        SqlDbType = SqlDbType.Int,
-                        Value = category.IdCategory
-                    });
-                    break;
-                case ActionType.Delete:
-                    parameters.Add(new SqlParameter()
-                    {
-                        ParameterName = "@categoryId",
-                        SqlDbType = SqlDbType.Int,
-                        Value = category.IdCategory
-                    });
-                    break;
-            }
-
-            return parameters;
+                ActionType.Insert => new List<SqlParameter>
+                {
+                    SqlParameterBuilder.CreateParameter("@Label", SqlDbType.VarChar, 50, category.Label),
+                    SqlParameterBuilder.CreateParameter("@Description", SqlDbType.VarChar, 50, category.Description)
+                },
+                ActionType.Update => new List<SqlParameter>
+                {
+                    SqlParameterBuilder.CreateParameter("@p_Label", SqlDbType.VarChar, 50, category.Label),
+                    SqlParameterBuilder.CreateParameter("@p_id", SqlDbType.Int, (object)category.IdCategory),
+                    SqlParameterBuilder.CreateParameter("@categoryId", SqlDbType.Int, (object)category.IdCategory)
+                },
+                ActionType.Delete => new List<SqlParameter>
+                {
+                    SqlParameterBuilder.CreateParameter("@categoryId", SqlDbType.Int, (object)category.IdCategory)
+                },
+                _ => new List<SqlParameter>()
+            };
         }
 
         #endregion
