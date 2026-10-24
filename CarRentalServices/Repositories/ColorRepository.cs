@@ -29,7 +29,9 @@ namespace CarRentalServices.Repositories
 
         public IEnumerable<Color> GetColors()
         {
-            var data = _mySqlDataService.ExecuteSql("select * from colors;");
+            //var data = _mySqlDataService.ExecuteSql("select * from colors;");
+            var sql = "GetAllColors";            
+            var data = _mySqlDataService.ExecSP(sql);
             if (data.Tables.Count > 0 && data.Tables[0].Rows.Count > 0)
             {
                 return MapColors(data.Tables[0]);
@@ -39,7 +41,10 @@ namespace CarRentalServices.Repositories
 
         public Color? GetColor(int id)
         {
-            var data = _mySqlDataService.ExecuteSql($"SELECT * FROM colors WHERE IdColor = {id};");
+            //var data = _mySqlDataService.ExecuteSql($"SELECT * FROM colors WHERE IdColor = {id};");
+            var sql = "GetColorById";
+            IEnumerable<MySqlParameter> parameters = CreateParametersMySql(new Color { IdColor=id}, ActionType.SelectById);
+            var data = _mySqlDataService.ExecSP(sql, parameters);
             if (data.Tables.Count > 0 && data.Tables[0].Rows.Count > 0)
             {
                 return MapColors(data.Tables[0]).FirstOrDefault();
@@ -101,6 +106,10 @@ namespace CarRentalServices.Repositories
                     MySqlParameterBuilder.CreateParameter("@p_id", MySqlDbType.Int32, (object)color.IdColor)
                 },
                 ActionType.Delete => new List<MySqlParameter>
+                {
+                    MySqlParameterBuilder.CreateParameter("@p_id", MySqlDbType.Int32, (object)color.IdColor)
+                },
+                ActionType.SelectById => new List<MySqlParameter>
                 {
                     MySqlParameterBuilder.CreateParameter("@p_id", MySqlDbType.Int32, (object)color.IdColor)
                 },

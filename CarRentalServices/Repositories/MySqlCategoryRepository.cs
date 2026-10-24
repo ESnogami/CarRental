@@ -99,8 +99,8 @@ namespace CarRentalServices.Repositories
             {
                 ActionType.Insert => new List<MySqlParameter>
                 {
-                    MySqlParameterBuilder.CreateParameter("@Label", MySqlDbType.VarChar, 50, category.Label),
-                    MySqlParameterBuilder.CreateParameter("@Description", MySqlDbType.VarChar, 50, category.Description)
+                    MySqlParameterBuilder.CreateParameter("@p_label", MySqlDbType.VarChar, 50, category.Label),
+                    MySqlParameterBuilder.CreateParameter("@p_description", MySqlDbType.VarChar, 50, category.Description)
                 },
                 ActionType.Update => new List<MySqlParameter>
                 {

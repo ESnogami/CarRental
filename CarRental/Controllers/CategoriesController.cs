@@ -97,7 +97,7 @@ namespace CarRental.Controllers
             try
             {
                 var result = _categoryRepository.UpdateCategory(category);
-                return result ? Ok() : NoContent();
+                return result ? Ok() : Problem("Failed to update category.");
             }
             catch (Exception ex)
             {

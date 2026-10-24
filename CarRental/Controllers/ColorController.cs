@@ -17,6 +17,9 @@ namespace CarRental.Controllers
         }
 
         [HttpGet]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(List<Color>), 200)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Index()
         {
             try
@@ -52,7 +55,13 @@ namespace CarRental.Controllers
                 return Problem(ex.Message);
             }
         }
+
+
         [HttpPost]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(Color), 201)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Create(Color color)
         {
             try
@@ -67,6 +76,10 @@ namespace CarRental.Controllers
         }
 
         [HttpPut]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(Color), 200)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Update(Color color) 
         {
             var result = _colorRepository.UpdateColor(color);

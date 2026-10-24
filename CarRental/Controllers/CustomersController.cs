@@ -1,5 +1,4 @@
-﻿using Azure.Core.GeoJson;
-using CarRentalServices.Contracts;
+﻿using CarRentalServices.Contracts;
 using CarRentalServices.Entities;
 using Microsoft.AspNetCore.Mvc;
 
