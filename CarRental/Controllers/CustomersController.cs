@@ -10,7 +10,7 @@ namespace CarRental.Controllers
     {
         private ICustomerRepository _customerRepository;
 
-        public CustomersController([FromKeyedServices("MsSql")] ICustomerRepository customerRepository)
+        public CustomersController([FromKeyedServices("MySql")] ICustomerRepository customerRepository)
         {
             _customerRepository = customerRepository;
         }

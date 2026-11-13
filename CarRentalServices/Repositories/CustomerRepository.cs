@@ -3,12 +3,11 @@ using CarRentalServices.Entities;
 using CarRentalServices.Enums;
 using CarRentalServices.Services;
 using CarRentalServices.Utilities;
-using Microsoft.Data.SqlClient;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,12 +15,13 @@ namespace CarRentalServices.Repositories
 {
     public class CustomerRepository : ICustomerRepository
     {
-        private readonly IDataService _dataService;
+        private readonly IMySqlDataService _mySqlDataService;
 
-        public CustomerRepository( IDataService dataService)
+        public CustomerRepository(IMySqlDataService mySqlDataService)
         {
-            _dataService = dataService;
+            _mySqlDataService = mySqlDataService;
         }
+
         public bool DeleteCustomer(int id)
         {
             throw new NotImplementedException();
@@ -29,17 +29,24 @@ namespace CarRentalServices.Repositories
 
         public Customer? GetCustomerById(int id)
         {
-            throw new NotImplementedException();
+            var sql = "GetCustomerById";
+            IEnumerable<MySqlParameter> parameters = CreateParametersMySql(new Customer { IdCustomer = id }, ActionType.SelectById);
+            var data = _mySqlDataService.ExecSP(sql, parameters);
+            if (data.Tables.Count > 0 && data.Tables[0].Rows.Count > 0)
+            {
+                return MapCustomers(data.Tables[0]).FirstOrDefault();
+            }
+            return null;
         }
 
         public IEnumerable<Customer> GetCustomers()
         {
-            var sql = "dbo.GetCustomers";
-            var data = _dataService.ExecSP(sql);
+            var sql = "GetCustomers";
+            var data = _mySqlDataService.ExecSP(sql);
             var lstCustomers = new List<Customer>();
-            if(data != null && data.Tables.Count>0 && data.Tables[0].Rows.Count > 0)
+            if (data != null && data.Tables.Count > 0 && data.Tables[0].Rows.Count > 0)
             {
-                lstCustomers= MapCustomers(data.Tables[0]);
+                lstCustomers = MapCustomers(data.Tables[0]);
             }
             return lstCustomers;
         }
@@ -47,8 +54,8 @@ namespace CarRentalServices.Repositories
         public bool InsertCustomer(Customer customer)
         {
             var sql = "InsertCustomer";
-            IEnumerable<SqlParameter> parameters = CreateSqlParameters(customer, ActionType.Insert);
-            var result = _dataService.ExecuteStoredProcedure(sql, parameters);
+            IEnumerable<MySqlParameter> parameters = CreateParametersMySql(customer, ActionType.Insert);
+            var result = _mySqlDataService.ExecSP(sql, parameters);
             if (result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
             {
                 customer.IdCustomer = Convert.ToInt32(result.Tables[0].Rows[0]["newCustomerId"]);
@@ -59,8 +66,8 @@ namespace CarRentalServices.Repositories
         public bool UpdateCustomer(Customer customer)
         {
             var sql = "UpdateCustomer";
-            IEnumerable<SqlParameter> parameters = CreateSqlParameters(customer, ActionType.Update);
-            _dataService.ExecuteStoredProcedure(sql, parameters);
+            IEnumerable<MySqlParameter> parameters = CreateParametersMySql(customer, ActionType.Update);
+            _mySqlDataService.ExecSP(sql, parameters);
             return true;
         }
 
@@ -78,6 +85,7 @@ namespace CarRentalServices.Repositories
                     SocialSecurityNumber = (string)row["SSN"],
                     Email = (string)row["Email"],
                     CountryName = (string)row["Country"],
+                    CountryId = Convert.ToInt32(row["CountryId"]),
                     MobilePhone = (string)row["Mobile"],
                     StateName = (string)row["StateName"]
                 };
@@ -86,34 +94,37 @@ namespace CarRentalServices.Repositories
             return lstCustomers;
         }
 
-        private static IEnumerable<SqlParameter> CreateSqlParameters(Customer customer, ActionType actionType)
+        private static IEnumerable<MySqlParameter> CreateParametersMySql(Customer customer, ActionType actionType)
         {
             return actionType switch
             {
-                ActionType.Insert => new List<SqlParameter>
+                ActionType.Insert => new List<MySqlParameter>
                 {
-                    SqlParameterBuilder.CreateParameter("@FirstName", SqlDbType.VarChar, 50, customer.FirstName),
-                    SqlParameterBuilder.CreateParameter("@LastName", SqlDbType.VarChar, 50, customer.LastName),
-                    SqlParameterBuilder.CreateParameter("@SSN", SqlDbType.VarChar, customer.SocialSecurityNumber),
-                    SqlParameterBuilder.CreateParameter("@Email", SqlDbType.VarChar, customer.Email),
-                    SqlParameterBuilder.CreateParameter("@CountryId", SqlDbType.Int, customer.CountryId),
-                    SqlParameterBuilder.CreateParameter("@Mobile", SqlDbType.VarChar, customer.MobilePhone),
-                    SqlParameterBuilder.CreateParameter("@StateName", SqlDbType.VarChar, customer.StateName)
+                    MySqlParameterBuilder.CreateParameter("@p_FirstName", MySqlDbType.VarChar, 50, customer.FirstName),
+                    MySqlParameterBuilder.CreateParameter("@p_LastName", MySqlDbType.VarChar, 50, customer.LastName),
+                    MySqlParameterBuilder.CreateParameter("@p_SSN", MySqlDbType.VarChar, 20, customer.SocialSecurityNumber),
+                    MySqlParameterBuilder.CreateParameter("@p_Email", MySqlDbType.VarChar, 100, customer.Email),
+                    MySqlParameterBuilder.CreateParameter("@p_CountryId", MySqlDbType.Int32, (object)customer.CountryId),
+                    MySqlParameterBuilder.CreateParameter("@p_Mobile", MySqlDbType.VarChar, 20, customer.MobilePhone),
+                    MySqlParameterBuilder.CreateParameter("@p_StateName", MySqlDbType.VarChar, 50, customer.StateName)
                 },
-                ActionType.Update => new List<SqlParameter>
+                ActionType.Update => new List<MySqlParameter>
                 {
-                    SqlParameterBuilder.CreateParameter("@FirstName", SqlDbType.VarChar, 50, customer.FirstName),
-                    SqlParameterBuilder.CreateParameter("@LastName", SqlDbType.VarChar, 50, customer.LastName),
-                    SqlParameterBuilder.CreateParameter("@SSN", SqlDbType.VarChar, customer.SocialSecurityNumber),
-                    SqlParameterBuilder.CreateParameter("@Email", SqlDbType.VarChar, customer.Email),
-                    SqlParameterBuilder.CreateParameter("@CountryId", SqlDbType.Int, customer.CountryId),
-                    SqlParameterBuilder.CreateParameter("@Mobile", SqlDbType.VarChar, customer.MobilePhone),
-                    SqlParameterBuilder.CreateParameter("@StateName", SqlDbType.VarChar, customer.StateName),
-                    SqlParameterBuilder.CreateParameter("@customerId", SqlDbType.Int, customer.IdCustomer)
+                    MySqlParameterBuilder.CreateParameter("@p_FirstName", MySqlDbType.VarChar, 50, customer.FirstName),
+                    MySqlParameterBuilder.CreateParameter("@p_LastName", MySqlDbType.VarChar, 50, customer.LastName),
+                    MySqlParameterBuilder.CreateParameter("@p_SSN", MySqlDbType.VarChar, 20, customer.SocialSecurityNumber),
+                    MySqlParameterBuilder.CreateParameter("@p_Email", MySqlDbType.VarChar, 100, customer.Email),
+                    MySqlParameterBuilder.CreateParameter("@p_CountryId", MySqlDbType.Int32, (object)customer.CountryId),
+                    MySqlParameterBuilder.CreateParameter("@p_Mobile", MySqlDbType.VarChar, 20, customer.MobilePhone),
+                    MySqlParameterBuilder.CreateParameter("@p_StateName", MySqlDbType.VarChar, 50, customer.StateName),
+                    MySqlParameterBuilder.CreateParameter("@p_customerId", MySqlDbType.Int32, (object)customer.IdCustomer)
                 },
-                _ => new List<SqlParameter>()
-            };      
-                        
+                ActionType.SelectById => new List<MySqlParameter>
+                {
+                    MySqlParameterBuilder.CreateParameter("@p_id", MySqlDbType.Int32, (object)customer.IdCustomer)
+                },
+                _ => new List<MySqlParameter>()
+            };
         }
         #endregion
     }
